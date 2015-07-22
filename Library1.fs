@@ -145,7 +145,7 @@ module Library1 =
         let reserved = ["for"; "do"; "while"; "if"; "switch"; "case"; "default";"break" (*;...*)]
         let pidentifierraw =
             let isIdentifierFirstChar c = isLetter c || c = '_'
-            let isIdentifierChar c = isLetter c || isDigit c || c = '_'
+            let isIdentifierChar c = isLetter c || isDigit c || c = '_' || c = '.' // Todo : improve . management
             many1Satisfy2L isIdentifierFirstChar isIdentifierChar "identifier"
         pidentifierraw 
         >>= fun s -> 
@@ -169,7 +169,7 @@ module Library1 =
                             opt pargref <|> opt pargout
                             |>> function Some x -> x | None -> ValueArg
                         pargtype .>>. pexpr |>> Arg
-                    pidentifier_ws .>>. between (str_ws "(") (str_ws ")") (many parg)
+                    pidentifier_ws .>>. between (str_ws "(") (str_ws ")") (sepBy parg (str_ws ","))
                     |>> MethodInvoke
                 (pliteral |>> Value) <|> attempt pinvoke <|> attempt pvar <|> attempt pcast
             pvalue .>> ws <|> between (str_ws "(") (str_ws ")") pexpr
@@ -295,10 +295,13 @@ module Library1 =
 
     // Modifiers
     let pmodifier = 
-        let psealed = str_ws1 "sealed" >>% Sealed
         let pstatic = str_ws1 "static" >>% Static
+        let psealed = str_ws1 "sealed" >>% Sealed
+        let poverride = str_ws1 "override" >>% Override
+        let pvirtual = str_ws1 "virtual" >>% Virtual
+        let pabstract = str_ws1 "abstract" >>% Abstract
         let pconst = str_ws1 "const" >>% Const
-        psealed <|> pstatic <|> pconst
+        pstatic <|> psealed <|> poverride <|> pvirtual <|> pabstract <|> pconst
 
     let createParam x y z = Param(x, y, z)
 
@@ -344,6 +347,7 @@ module Library1 =
             let pimplements =
                 opt (str_ws ":" >>. sepBy1 (pidentifier_ws) (str_ws ","))
                 |>> function Some xs -> xs | None -> []
+
             let pmembersblock =
                 let pmember =
                     let pfield =
@@ -364,8 +368,8 @@ module Library1 =
                         pipe2 pmemberinfo ppropertyblock (fun mi (gblock, sblock) -> Property(mi, gblock, sblock))
                     let pconstructor = 
                         pipe5 paccess (opt pmodifier) pidentifier_ws pparamlist pstatementblock
-                         (fun access modifier name ps block ->
-                           Constructor(access, modifier, name, ps, None, block))
+                         (fun access modifier name ps block -> 
+                            Constructor(access, modifier, name, ps, None, block))
                     attempt pfield <|> attempt pmethod <|> attempt pproperty <|> attempt pconstructor
                 between (str_ws "{") (str_ws "}") (many pmember) |>> (fun members -> members)
             let pclass =
@@ -383,7 +387,8 @@ module Library1 =
                 pipe4 paccess (str_ws1 "enum") pidentifier_ws penumblock (fun access _ name block -> Enum(access, name, block))
             let pdelegate =
                 pipe5 paccess (str_ws1 "delegate") pidentifier_ws pidentifier_ws pparamlist
-                 (fun access _ ty name ps -> Delegate(access, ty, name, ps))
+                 (fun access _ ty name ps -> 
+                    Delegate(access, ty, name, ps))
             pclass <|> pstruct <|> pinterface <|> penum <|> pdelegate
         pipe2 (many pimport) (many1 ptypedeclaration)
          (fun imports classes -> Types(imports, classes))

@@ -16,10 +16,17 @@ namespace CompanyName {
   namespace ProjectName.FolderName {
   /* My class */
   class MyClass : IMarker {
-    private const string CatalogUri = @"/AnalogWay.ARCORX.Boot;component/ModulesCatalog.xaml";
-        private const string CatalogUri = @"/AnalogWay.ARCORX.Boot;component/ModulesCatalog.xaml";
+    private const string CatalogUri = @"\n/AnalogWay.ARCORX.Boot;component/ModulesCatalog.xaml";
+    private const string CatalogUri = "\n/AnalogWay.ARCORX.Boot;component/ModulesCatalog.xaml";
     float y = 42;
     // My foo
+
+    protected override IModuleCatalog CreateModuleCatalog()
+    {
+        toto(32);
+        return Microsoft.Practices.Prism.Modularity.ModuleCatalog.CreateFromXaml(new Uri(CatalogUri, UriKind.RelativeOrAbsolute));
+    }
+
     bool MyMethod(string arg) {
       string s = (string) "hello"; // assign string lit
       for(int i = 1; i<=100; i++) {
