@@ -16,7 +16,9 @@ namespace CompanyName {
   namespace ProjectName.FolderName {
   /* My class */
   class MyClass : IMarker {
-    const float y = 42;
+    private const string CatalogUri = @"/AnalogWay.ARCORX.Boot;component/ModulesCatalog.xaml";
+        private const string CatalogUri = @"/AnalogWay.ARCORX.Boot;component/ModulesCatalog.xaml";
+    float y = 42;
     // My foo
     bool MyMethod(string arg) {
       string s = (string) "hello"; // assign string lit

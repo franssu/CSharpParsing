@@ -6,8 +6,11 @@ module Library1 =
     type TypeName = Name
     type MemberName = Name
     type LabelName = Name
-    type Literal = Literal of obj
+    type Literal = 
+        | Literal of obj
+        | VerbatimLiteral of obj
     let createLiteral = fun x -> Literal(x)
+    let createVerbatimLiteral = fun x -> VerbatimLiteral(x)
     type ArgType = ValueArg | RefArg | OutArg
     type Expr = 
         | Value of Literal
@@ -130,7 +133,10 @@ module Library1 =
                            | x -> x
             let escapedChar = pstring "\\" >>. (anyOf "\\nrt\"" |>> unescape)
             between (pstring "\"") (pstring "\"") (manyChars (normalChar <|> escapedChar)) |>> createLiteral
-        pnumber <|> pbool <|> pstringliteral
+        let pstringverbatimliteral =
+            let normalChar = satisfy (fun c -> c <> '"')
+            pstring "@" >>. between (pstring "\"") (pstring "\"") (manyChars normalChar) |>> createVerbatimLiteral
+        pnumber <|> pbool <|> pstringliteral <|> pstringverbatimliteral
 
     // Expressions
     let pexpr, pexprimpl = createParserForwardedToRef ()
