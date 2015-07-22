@@ -345,8 +345,8 @@ module Library1 =
                             let preadonly = str_ws1 "readonly"
                             pipe3 paccess (opt pmodifier) (opt preadonly)
                              (fun access modifier ro -> (access, modifier, Option.isSome ro))
-                        pipe4 pfieldpreamble pidentifier_ws pidentifier_ws (str_ws ";")
-                         (fun (access, modifier, ro) rt name _ -> Field(access, modifier, ro, rt, name, None))
+                        pipe5 pfieldpreamble pidentifier_ws pidentifier_ws (opt (str_ws "=" >>. pexpr)) (str_ws ";")
+                         (fun (access, modifier, ro) rt name expr _ -> Field(access, modifier, ro, rt, name, expr))
                     let pmemberinfo = 
                         pipe4 paccess (opt pmodifier) pidentifier_ws pidentifier_ws createMemberInfo
                     let pmethod = pipe3 pmemberinfo pparamlist pstatementblock (fun mi ps block -> Method(mi, ps, block))
