@@ -4,10 +4,12 @@
 #r @"System.dll"
 #r @"System.Numerics.dll"
 
-#load @"Library1.fs"
+#load @"Types.fs"
+#load @"Parsing.fs"
 
 open FParsec
-open CSharpParsing.Library1
+open CSharpParsing.Types
+open CSharpParsing.Parsing
     
 let program = """
 #region toto
