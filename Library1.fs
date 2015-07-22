@@ -314,9 +314,6 @@ module Library1 =
                 let pparams = str_ws1 "params" >>% Params
                 (opt pout <|> opt pref <|> opt pparams) 
                 |>> function Some x -> x | None -> ByValue
-
-            let pipe3' (a : Parser<'a, 'u>) (b : Parser<'b, 'u>) (c : Parser<'c, 'u>) (d : 'a * 'b * 'c -> 'd) : Parser<'d, 'u>  =
-                pipe3 a b c (fun x y z -> d(x, y, z))
             pipe3 pby pidentifier_ws pidentifier_ws createParam
         str_ws "(" >>. sepBy pparam (str_ws ",") .>> str_ws ")"
     
